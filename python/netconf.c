@@ -18,6 +18,8 @@
 /* standard headers */
 #include <nc_client.h>
 #include <syslog.h>
+#include <libyang/tree_data.h>
+#include <libyang/swigpyrun.h>
 
 #include "netconf.h"
 
@@ -26,6 +28,27 @@ PyObject *libnetconf2Warning;
 
 /* syslog usage flag */
 static int syslogEnabled = 0;
+
+static PyObject *
+parse_lyd_data(PyObject *module, PyObject *args)
+{
+    PyObject *node = args;
+
+	if (SWIG_IsOK(SwigPyObject_Check(node))) {
+		struct lyd_node *addr = NULL;
+		swig_type_info *type = SWIG_Python_TypeQuery("lyd_node*");
+		int ok = SWIG_ConvertPtr(node, (void**)&addr, type, SWIG_POINTER_DISOWN);
+		if (SWIG_IsOK(ok)) {
+			printf("SUCCESS\n");
+			if(addr) printf("data schema name %s\n", addr->schema->name);
+		} else {
+			printf("FAIL\n");
+		}
+	}
+
+    Py_RETURN_NONE;
+}
+
 
 static void
 clb_print(NC_VERB_LEVEL level, const char* msg)
@@ -116,6 +139,8 @@ setSearchpath(PyObject *self, PyObject *args, PyObject *keywds)
 }
 
 static PyMethodDef netconf2Methods[] = {
+		{"parse_lyd_data", (PyCFunction)parse_lyd_data, METH_O,
+		 "struct lyd_data* pyobject."},
 		{"setVerbosity", (PyCFunction)setVerbosity, METH_VARARGS | METH_KEYWORDS,
 		 "setVerbosity(level)\n--\n\n"
 		 "Set verbose level\n\n"
