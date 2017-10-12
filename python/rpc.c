@@ -69,7 +69,7 @@ static PyObject *
 process_reply_data(struct nc_reply *reply)
 {
     struct lyd_node *data;
-    PyObject *result;
+    PyObject *result, *lyd_node;
 
     /* check the type of the received reply message */
     if (reply->type != NC_RPL_DATA) {
@@ -87,12 +87,19 @@ process_reply_data(struct nc_reply *reply)
     ((struct nc_reply_data*)reply)->data = NULL;
     nc_reply_free(reply);
 
-    lyd_print_file(stdout, data, LYD_XML, LYP_FORMAT);
-
-    result = SWIG_NewPointerObj(data, SWIG_Python_TypeQuery("std::shared_ptr<Data_Node>*"), SWIG_POINTER_DISOWN);
-    if (!result) {
+    lyd_node = SWIG_NewPointerObj(data, SWIG_Python_TypeQuery("lyd_node*"), SWIG_POINTER_DISOWN);
+    if (!lyd_node) {
         PyErr_SetString(libnetconf2Error, "Building Python object from lyd_node* failed");
     }
+
+	PyObject *module = PyImport_ImportModule("libyang");
+	if (module == NULL) {
+        PyErr_SetString(libnetconf2Error, "Could not import libyang module");
+	}
+	result = PyObject_CallMethod(module, "create_new_Data_Node", "(O)", lyd_node);
+	if (result == NULL) {
+        PyErr_SetString(libnetconf2Error, "Could not get Data_Node");
+	}
 
     return result;
 }
