@@ -33,24 +33,32 @@ static PyObject *
 parse_lyd_data(PyObject *module, PyObject *args)
 {
 	struct lyd_node *addr = NULL;
+	void *check_ptr = NULL;
 	PyObject *node;
+	int ret;
 
 	if (!SWIG_IsOK(SwigPyObject_Check(node))) {
-		PyErr_SetString(libnetconf2Error, "ERROR");
+		PyErr_SetString(libnetconf2Error, "Not a SWIG Python Object");
+	}
+
+	/* check the PyObject type against "std::shared_ptr<Data_Node>*" */
+	ret = SWIG_ConvertPtr(args, (void**)&check_ptr, SWIG_Python_TypeQuery("std::shared_ptr<Data_Node>*"), SWIG_POINTER_DISOWN);
+	if (!SWIG_IsOK(ret)) {
+		PyErr_SetString(libnetconf2Error, "PyObject is not Data_Node");
 	}
 
 	node = PyObject_CallMethod(args, "C_lyd_node", "()", NULL);
 	if (node == NULL) {
-		PyErr_SetString(libnetconf2Error, "ERROR");
+		PyErr_SetString(libnetconf2Error, "Could not call method C_lyd_node()");
 	}
 
-	swig_type_info *type = SWIG_Python_TypeQuery("lyd_node*");
-	int ok = SWIG_ConvertPtr(node, (void**)&addr, type, SWIG_POINTER_DISOWN);
-	if (!SWIG_IsOK(ok)) {
-		PyErr_SetString(libnetconf2Error, "ERROR");
+	ret = SWIG_ConvertPtr(node, (void**)&addr, SWIG_Python_TypeQuery("lyd_node*"), SWIG_POINTER_DISOWN);
+	if (!SWIG_IsOK(ret)) {
+		PyErr_SetString(libnetconf2Error, "Could not extract the lyd_node* pointer from the PyObject");
 	}
+	Py_DecRef(node);
 
-	printf("schema name %s\n", addr->schema->name);
+	if (addr) printf("schema name %s\n", addr->schema->name);
 
 	Py_RETURN_NONE;
 }

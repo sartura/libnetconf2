@@ -90,7 +90,7 @@ process_reply_data(struct nc_reply *reply)
     lyd_node = SWIG_NewPointerObj(data, SWIG_Python_TypeQuery("lyd_node*"), SWIG_POINTER_DISOWN);
     if (!lyd_node) {
         PyErr_SetString(libnetconf2Error, "Building Python object from lyd_node* failed");
-    }
+	}
 
 	PyObject *module = PyImport_ImportModule("libyang");
 	if (module == NULL) {
@@ -100,6 +100,7 @@ process_reply_data(struct nc_reply *reply)
 	if (result == NULL) {
         PyErr_SetString(libnetconf2Error, "Could not get Data_Node");
 	}
+	Py_DecRef(module);
 
     return result;
 }
