@@ -37,10 +37,6 @@ parse_lyd_data(PyObject *module, PyObject *args)
 	PyObject *node;
 	int ret;
 
-	if (!SWIG_IsOK(SwigPyObject_Check(node))) {
-		PyErr_SetString(libnetconf2Error, "Not a SWIG Python Object");
-	}
-
 	/* check the PyObject type against "std::shared_ptr<Data_Node>*" */
 	ret = SWIG_ConvertPtr(args, (void**)&check_ptr, SWIG_Python_TypeQuery("std::shared_ptr<Data_Node>*"), SWIG_POINTER_DISOWN);
 	if (!SWIG_IsOK(ret)) {
