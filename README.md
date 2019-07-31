@@ -284,10 +284,12 @@ cmake's options.
 Tests can be run by the make's `test` target:
 ```
 $ make test
-
+```
 ## Fuzzing
 
 A fuzzing harness for the AFL fuzzer is provided in fuzz/rpcsendfuzz.c. To build the fuzz harness the ENABLE_FUZZ_TARGETS CMake flag has to be used. An example build is shown below:
+
+```
 $ cmake -DENABLE_FUZZ_TARGETS=ON -DCMAKE_C_COMPILER=afl-2.52b ..
 
 ```
